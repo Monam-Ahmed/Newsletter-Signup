@@ -3,6 +3,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const request = require("request");
+const https = require("https");
 
 const app = express();
 
@@ -14,12 +15,44 @@ app.get("/",function(req,res){
 }); 
 app.post("/",function(req,res){
 
-    var firstName = req.body.fName;
-    var lastName = req.body.lName;
-    var email= req.body.emailName;
-    console.log(firstName, lastName, email);
+    const firstName = req.body.fName;
+    const lastName = req.body.lName;
+    const email= req.body.emailName;
+    
+    const data = {
+        members: [
+            {
+                email_address:email,
+                status:"subscribed",
+                merge_fields:{
+                    FNAME:firstName,
+                    LNAME:lastName
+                }
+            }
+        ]
+    };
+
+    const jsonData = JSON.stringify(data);
+    const options = {
+        method:"POST",
+        auth:"Monam1:64e003c5cf5f9fffd601c328d27bbcc5-us5"
+    }
+    const url = "https://us5.api.mailchimp.com/3.0/lists/024a5dd758";
+    const request = https.request(url,options,function(response){
+        response.on("data",function(data){
+            console.log(JSON.parse(data));
+        })
+    });
+    request.write(jsonData);    
 });
+
 
 app.listen(3000,function(){
     console.log("server is running on port 3000");
 })
+
+// API Key
+// 64e003c5cf5f9fffd601c328d27bbcc5-us5
+ 
+// List ID
+// 024a5dd758
